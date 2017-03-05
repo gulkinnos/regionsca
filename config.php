@@ -1,10 +1,10 @@
 <?php
 
-return array(
+return $config= array(
     'db' => array(
         'host' => 'localhost',
-        'database' => 'region',
-        'user' => 'root',
-        'password' => ''
+        'database' => 'ya ne publikuyu config',
+        'user' => 'ya ne publikuyu username',
+        'password' => 'ya ne publikuyu paroli'
     )
 );
