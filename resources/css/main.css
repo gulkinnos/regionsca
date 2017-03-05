@@ -1,0 +1,24 @@
+
+/* 
+    Created on : 04.03.2017, 15:34:34
+    Author     :  Aleksandr Golubev aka gulkinnos <gulkinnos@gmail.com>
+
+*/
+
+#signOut{
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+        
+}
+#fondsPreview{
+    border-collapse: collapse;
+}
+#fondsPreview td, th{
+    border-collapse: collapse;
+    border: solid 1px black;
+    padding: 0.5rem;
+}
+#fondsPreview tr:nth-child(even){
+    background-color: #eef5e8;
+}

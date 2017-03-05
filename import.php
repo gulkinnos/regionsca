@@ -1,33 +1,29 @@
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
 
 </head>
 <?php
-//получить имя файла
-
+include_once $_SERVER['DOCUMENT_ROOT'] . '/App.php';
+include_once $_SERVER['DOCUMENT_ROOT'] . '/includes/checkAuth.php';
+include_once $_SERVER['DOCUMENT_ROOT'] . '/classes/XtddParser.php';
+include_once $_SERVER['DOCUMENT_ROOT'] . '/classes/Fond.php';
+include_once $_SERVER['DOCUMENT_ROOT'] . '/classes/Fonds.php';
+$xtddParser = new XtddParser();
 $filename = $_FILES['xmlfile']['tmp_name'];
+$preview = $xtddParser->parseXTDD($filename);
 
-//получить содержимое файла 
-
-$content = file_get_contents($filename);
-//добавить проверку на не пустоту контента
-
-$notValid1 = 'xmlns:av="http://www.it.ru/Schemas/Avior/УРКИ"';
-$content = str_replace($notValid1, '', $content);
-$notValid2 = '/av:/';
-$content = preg_replace($notValid2, '', $content);
-
-//создаем объект, используя готовую библиотеку simlexml
-
-$xml = simplexml_load_string($content);
-
-//
-$fonds = $xml->КоллекцияОтчетностьРКИОтчет070->ОтчетностьРКИОтчет070->ОтчетностьРКИОтчет070_1;
-
-if (!is_object($fonds) || count($fonds) < 1) {
-    die('Нам не удалось разобрать файл корректно, в блоке ОтчетностьРКИОтчет070_1 нет вложенных элементов');
+if (!is_array($preview)) {
+    die('Не удалось разобрать файл. Возможно он пуст');
+}
+if (count($preview) < 1) {
+    die('Не удалось разобрать файл. Возможно он пуст');
 }
 
+$xtddParser->printParsedPreview($preview);
+
+
+die();
+//die(var_dump($preview));
 //$config = getConfig();
 //$dbConnect = getDBlink($config);
 require_once './App.php';
@@ -46,20 +42,7 @@ echo '<pre>';
 
 
 
-foreach ($fonds as $fond_data) {
-    $regNumber = (string) trim(strip_tags($fond_data->РегНомерПиф));
-    if (count($allFondsCollectedByRegNumber) < 1 || !isset($allFondsCollectedByRegNumber[$regNumber])) {
-        $addedNewFond = addNewFond($fond_data);
-        if ($addedNewFond) {
-            echo '<p>Добавлен новый фонд, так как не нашёлся в базе данных.</p>';
-            printMyObject($fond_data);
-        }
-    }
 
-
-
-//   var_dump($fond_data);  
-}
 
 
 die('aga');
@@ -107,11 +90,12 @@ function addNewFond($fond_data) {
                 "' . $dbConnect->real_escape_string($date) . '",
                 "' . $dbConnect->real_escape_string($sca) . '",
                 1);';
+        var_dump($sql);
 
-        $dbr = mysqli_query($dbConnect, $sql);
+        $dbr = $dbConnect->query($sql);
 
-        echo $sql;
-        var_dump($dbr);
+//        echo $sql;
+//        die();
     }
 
 
@@ -121,7 +105,7 @@ function addNewFond($fond_data) {
      *  VALUES (NULL, '1111-2222-333', 'тестовое ', '2017-02-20', '9000000000.99', '1');
      */
     echo '<pre>';
-    var_dump($regNumber, $name, $sca);
+//    var_dump($regNumber, $name, $sca);
 
 
 
@@ -164,42 +148,6 @@ function getAllFondsData() {
     if ($dbResult) {
         while ($row = mysqli_fetch_assoc($dbResult)) {
             $result[$row['id']] = $row;
-        }
-    }
-    return $result;
-}
-
-/** Получает все фонды из базы данных. Собирает их по регистрационному номеру
- *  в качестве ключа.
- * Нужен, чтобы потом проверять иссетом каждый распарсенный фонд.
- *  
- * Говнометод. Переделать на вменяемый 
- * Возвращает массив со всеми данными по всем фондам с группировкой по 
- * регистрационному номеру фондов.
- * 
- * @param mysqli $dbConnect - соединение с базой данных
- * @return array
- */
-function getAllFondsDataCollectedByRegNumber() {
-    $result = [];
-
-    $App = new App();
-    $dbConnect = $App->getDB();
-    if (!mysqli_errno($dbConnect)) {
-        $sql = '
-            SELECT 
-               *
-                FROM
-                    `fonds`
-                    ORDER BY 
-                        `regNumber` ASC 
-                    LIMIT 10000;                  
-            ';
-    }
-    $dbResult = mysqli_query($dbConnect, $sql);
-    if ($dbResult) {
-        while ($row = mysqli_fetch_assoc($dbResult)) {
-            $result[$row['regNumber']] = $row;
         }
     }
     return $result;

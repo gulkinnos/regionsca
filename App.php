@@ -16,11 +16,14 @@ class App {
     public $config = array();
     public $db = null;
 
-
+    function __construct() {
+        header('Content-Type: text/html; charset=utf-8');
+    }
 
     public function getConfig() {
         if (empty($this->config)) {
-            $this->config = include_once './config.php';
+            include $_SERVER['DOCUMENT_ROOT'] . '/config.php';
+            $this->config =  $config;
         }
         return $this->config;
     }
