@@ -2,7 +2,7 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" type="text/css" href="resources/css/main.css" >
 </head>
-<h1>Регион</h1>
+<h2>Регион. Загрузка СЧА из .xtdd</h2>
 
 
 <?php

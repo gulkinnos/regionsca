@@ -17,11 +17,104 @@ class Fond {
     public $enabled = 0;
     public $date = 0;
     public $fondData = array();
+    public $fondDates = array();
     public $datesSCA = array();
     public $existingFonds = array();
 
     function __construct() {
-        
+        include_once $_SERVER['DOCUMENT_ROOT'] . '/App.php';
+//        $this->getFondDatesByID(2);
+    }
+
+    /**
+     * 
+     * @param type $regNumber
+     * @param type $name
+     * @param type $sca
+     * @return boolean
+     */
+    function createNewFond($regNumber, $name, $sca) {
+        $result = false;
+
+        if (trim(strip_tags($regNumber)) == '') {
+            return $result;
+        }
+        $regNumber = trim(strip_tags($regNumber));
+
+        if (trim(strip_tags($name)) == '') {
+            return $result;
+        }
+        $name = trim(strip_tags($name));
+
+        $sca = trim(strip_tags($sca));
+        if (trim(strip_tags($sca)) == '') {
+            return $result;
+        }
+        $sca = trim(strip_tags($sca));
+
+        $App = new App();
+        $dbConnect = $App->getDB();
+
+        if (!mysqli_errno($dbConnect)) {
+
+            $sql = 'INSERT INTO
+            `fonds`
+                (`regNumber`,
+                `name`,
+                `dateOfCreate`,
+                `sca`,
+                `enabled`)
+            VALUES (
+                "' . $dbConnect->real_escape_string($regNumber) . '",
+                "' . $dbConnect->real_escape_string($name) . '",
+                CURRENT_TIMESTAMP,
+                "' . $dbConnect->real_escape_string($sca) . '",
+                1);';
+            var_dump($sql);
+
+            $dbr = $dbConnect->query($sql);
+            $result = $dbConnect->insert_id;
+            if($result>0){
+                $this->id=$result;
+            }
+            echo $sql;
+        }
+        return $result;
+    }
+
+    function getFondDatesByID($fondId) {
+        $result = [];
+        if (!is_numeric($fondId) || $fondId < 1) {
+            $fondId = (integer) $fondId;
+        }
+        if ($fondId == 0) {
+            return $result;
+        }
+        $App = new App();
+        $dbConnect = $App->getDB();
+        if (!mysqli_errno($dbConnect)) {
+            $sql = '
+            SELECT 
+                `fd_id`,
+                `fd_fond_id`,
+                `fd_date`,
+                `fd_sca`,
+                `fd_sca_change_time`
+            FROM 
+                `fonds_dates`
+                WHERE `fd_fond_id`=' . $fondId . '
+                
+            LIMIT 10000;                  
+            ';
+        }
+//        die($sql);
+        $dbResult = mysqli_query($dbConnect, $sql);
+        if ($dbResult) {
+            while ($row = mysqli_fetch_assoc($dbResult)) {
+                $result[$row['fd_date']] = $row;
+            }
+        }
+        return $result;
     }
 
     function getFondDataByID($param) {
@@ -44,14 +137,19 @@ class Fond {
             return $result;
         }
         $name = trim(strip_tags($fond_data->ПаевойИнвестиционныйФонд));
-        $name=  preg_replace('/^["]+/', '', $name);
+        $name = preg_replace('/^["]+/', '', $name);
         $this->name = $name;
-        
+
         if (!isset($fond_data->СЧА)) {
             return $result;
         }
-        $this->sca = trim(strip_tags($fond_data->СЧА));
-
+        $sca = trim(strip_tags($fond_data->СЧА));
+        if (is_numeric($sca)) {
+            $sca = number_format(floatval($sca), 2, '.', '');
+        } else {
+            return $result;
+        }
+        $this->sca = $sca;
         if (!isset($fond_data->Дата)) {
             return $result;
         }
@@ -59,14 +157,49 @@ class Fond {
 
         $fondId = $this->getFondIDByRegNumber($this->regNumber);
         $this->id = $fondId;
+        $this->fondDates = $this->getFondDatesByID($this->id);
         $result = array(
             'id' => $this->id,
             'regNumber' => $this->regNumber,
             'name' => $this->name,
             'sca' => $this->sca,
-            'date' => $this->date
+            'date' => $this->date,
+            'fondDates' => $this->fondDates
         );
         return $result;
+    }
+
+    public
+            function updateSCAbyDate($date, $newSCA) {
+
+        $result = false;
+        if (trim(strip_tags($date)) == '') {
+            return $result;
+        }
+        $date = trim(strip_tags($date));
+        if (!is_numeric($newSCA)) {
+            return $result;
+        }
+        $newSCA = number_format(floatval($newSCA, 2, '.', ''));
+        die();
+
+        $App = new App();
+        $dbConnect = $App->getDB();
+        if (!mysqli_errno($dbConnect)) {
+            $sql = '
+             
+                `fd_id`,
+                `fd_fond_id`,
+                `fd_date`,
+                `fd_sca`,
+                `fd_sca_change_time`
+            FROM 
+                `fonds_dates`
+                WHERE `fd_fond_id`=' . $fondId . '
+                
+            LIMIT 10000;                  
+            ';
+        }
     }
 
     function getFondDataByRegNumber($param) {
@@ -79,15 +212,15 @@ class Fond {
             return $result;
         }
         if (isset($this->existingFonds[$this->regNumber]['id'])) {
-            $this->id = (integer)$this->existingFonds[$this->regNumber]['id'];
+            $this->id = (integer) $this->existingFonds[$this->regNumber]['id'];
             return $this->id;
         }
         return $result;
     }
 
     static function printFondData($fondData) {
-
         include $_SERVER['DOCUMENT_ROOT'] . '/templates/fond/fondPreview.php';
+        return;
     }
 
     function getId() {
@@ -136,6 +269,14 @@ class Fond {
 
     function setExistingFonds($existingFonds) {
         $this->existingFonds = $existingFonds;
+    }
+
+    function getFondDates() {
+        return $this->fondDates;
+    }
+
+    function setFondDates($fondDates) {
+        $this->fondDates = $fondDates;
     }
 
 }

@@ -6,8 +6,6 @@ if (isset($_POST['saveParsedData']) && $_POST['saveParsedData'] == 'save') {
         include_once $_SERVER['DOCUMENT_ROOT'] . '/classes/Fond.php';
         include_once $_SERVER['DOCUMENT_ROOT'] . '/classes/Fonds.php';
         $fonds = new Fonds();
-        die(var_dump($fonds->getAllFondsDataCollectedByRegNumber()));
-        
         $fonds->analizeParsedFondsData($parsedData);
         die(var_dump($parsedData));
     } else {

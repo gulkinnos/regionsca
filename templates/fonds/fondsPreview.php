@@ -2,6 +2,7 @@
 if (is_array($fondsData) && count($fondsData)) {
     ?>
     <form name="parsedFondsData" action="/includes/applyParsing.php" method="POST" enctype="multipart/form-data">
+        <p class="tableDescription">Предварительный просмотр результатов разбора файла.</p>
         <table id="fondsPreview">
             <tr id="fondsPreviewHead">
                 <th>РегНомерПиф</th>

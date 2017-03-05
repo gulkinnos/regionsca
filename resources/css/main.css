@@ -5,11 +5,13 @@
 
 */
 
-#signOut{
-    position: fixed;
+#signOut, #signIn{
+    position: absolute;
     top: 1rem;
-    right: 1rem;
-        
+    right: 10rem;
+    width: 20rem;
+    height: 5rem;
+
 }
 #fondsPreview{
     border-collapse: collapse;
@@ -21,4 +23,10 @@
 }
 #fondsPreview tr:nth-child(even){
     background-color: #eef5e8;
+}
+.tableDescription{
+    text-align: left;
+}
+.align-right{
+    text-align: right;
 }

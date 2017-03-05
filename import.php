@@ -47,56 +47,7 @@ echo '<pre>';
 
 die('aga');
 
-function addNewFond($fond_data) {
-    $result = false;
-    if (!is_object($fond_data) || count($fond_data) < 1) {
-        return $result;
-    }
 
-    if (!isset($fond_data->РегНомерПиф)) {
-        return $result;
-    }
-    $regNumber = trim(strip_tags($fond_data->РегНомерПиф));
-
-    if (!isset($fond_data->ПаевойИнвестиционныйФонд)) {
-        return $result;
-    }
-    $name = trim(strip_tags($fond_data->ПаевойИнвестиционныйФонд));
-
-    if (!isset($fond_data->СЧА)) {
-        return $result;
-    }
-    $sca = trim(strip_tags($fond_data->СЧА));
-    if (!isset($fond_data->Дата)) {
-        return $result;
-    }
-    $date = trim(strip_tags($fond_data->Дата));
-
-    $App = new App();
-    $dbConnect = $App->getDB();
-
-    if (!mysqli_errno($dbConnect)) {
-
-        $sql = 'INSERT INTO
-            `fonds`
-                (`regNumber`,
-                `name`,
-                `date`,
-                `sca`,
-                `enabled`)
-            VALUES (
-            "' . $dbConnect->real_escape_string($regNumber) . '",
-                "' . $dbConnect->real_escape_string($name) . '",
-                "' . $dbConnect->real_escape_string($date) . '",
-                "' . $dbConnect->real_escape_string($sca) . '",
-                1);';
-        var_dump($sql);
-
-        $dbr = $dbConnect->query($sql);
-
-//        echo $sql;
-//        die();
-    }
 
 
 
@@ -109,8 +60,6 @@ function addNewFond($fond_data) {
 
 
 
-    return $result;
-}
 
 function printMyObject($fond_data) {
     echo 'Рег. номер: ' . $fond_data->РегНомерПиф . '<br>';
