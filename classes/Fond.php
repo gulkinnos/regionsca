@@ -70,14 +70,14 @@ class Fond {
                 CURRENT_TIMESTAMP,
                 "' . $dbConnect->real_escape_string($sca) . '",
                 1);';
-            var_dump($sql);
+//            var_dump($sql);
 
             $dbr = $dbConnect->query($sql);
             $result = $dbConnect->insert_id;
             if($result>0){
                 $this->id=$result;
             }
-            echo $sql;
+//            echo $sql;
         }
         return $result;
     }

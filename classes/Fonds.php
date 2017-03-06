@@ -122,8 +122,8 @@ class Fonds {
                 //если фонда не нашлось на предыдущих этапах, то создаём новый
                 $newFondID = $fondObj->createNewFond($fondRegNumber, $fondName, $fondSCA);
             }
-            die(var_dump($fondObj));
-            var_dump($fondID,$newFondID);
+//            die(var_dump($fondObj));
+//            var_dump($fondID,$newFondID);
 
             /*
               if (!isset($fondsData['date']) || $fondsData['date'] == '') {

@@ -41,6 +41,8 @@ class App {
                 $this->config['db']['user'],
                 $this->config['db']['password'],
                 $this->config['db']['database']);
+        $setSQL='SET NAMES utf8 COLLATE utf8_general_ci';
+        $dbLink->query($setSQL);
         return $dbLink;
     }
 
