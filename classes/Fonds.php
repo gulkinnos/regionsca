@@ -58,17 +58,22 @@ class Fonds {
 
     public function analizeParsedFondsData($fondsData) {
         $result = [];
+        $result['startTime'] = microtime(true);
         if (!is_array($fondsData) || count($fondsData) < 1) {
             $result['errors'][] = 'Нечего разбирать. Пришёл пустой массив. Слушайтесь Инночку и обратитесь к разработчику. Код ошибки: 3011';
             return $result;
         }
         foreach ($fondsData as $regNumber => $fondData) {
+            $result['log'][$regNumber] = '';
+
             if (!is_array($fondData) || count($fondData) < 1) {
                 // сообщить об ошибке
+                $result['errors'][] = $regNumber . ' плохо разобрался. Слушайтесь Инночку и обратитесь к разработчику. Код ошибки: 3071';
                 continue;
             }
             if (!isset($fondData['fondID'], $fondData['regNumber'], $fondData['name'], $fondData['sca'], $fondData['date'])) {
                 // сообщить об ошибке
+                $result['errors'][] = $regNumber . ' плохо разобрался. Не хватает какого-то из обязательных параметров. Слушайтесь Инночку и обратитесь к разработчику. Код ошибки: 3072';
                 continue;
             }
 
@@ -76,6 +81,7 @@ class Fonds {
             //@todo Вынести в метод.
             if (trim(strip_tags($fondData['regNumber'])) == '') {
                 // сообщить об ошибке
+                $result['errors'][] = $regNumber . ' плохо разобрался. Регистрационный номер пустой. Слушайтесь Инночку и обратитесь к разработчику. Код ошибки: 3073';
                 continue;
             } else {
                 $fondRegNumber = trim(strip_tags($fondData['regNumber']));
@@ -85,6 +91,7 @@ class Fonds {
             //@todo Вынести в метод.
             if (trim(strip_tags($fondData['name'])) == '') {
                 // сообщить об ошибке
+                $result['errors'][] = $regNumber . ' плохо разобрался. Название пустое. Слушайтесь Инночку и обратитесь к разработчику. Код ошибки: 3074';
                 continue;
             } else {
                 $fondName = trim(strip_tags($fondData['name']));
@@ -94,15 +101,17 @@ class Fonds {
             //@todo Вынести в метод.
             if (trim(strip_tags($fondData['sca'])) == '') {
                 // сообщить об ошибке
+                $result['errors'][] = $regNumber . ' плохо разобрался. СЧА пустое. Слушайтесь Инночку и обратитесь к разработчику. Код ошибки: 3075';
                 continue;
             } else {
-                $fondSCA = trim(strip_tags($fondData['sca']));
+                $fondSCA = number_format(floatval(trim(strip_tags($fondData['sca']))), 2, '.', '');
             }
 
             //проверим, что пришла нормальная дата.
             //@todo Вынести в метод.
             if (trim(strip_tags($fondData['date'])) == '') {
                 // сообщить об ошибке
+                $result['errors'][] = $regNumber . ' плохо разобрался. СЧА пустое. Слушайтесь Инночку и обратитесь к разработчику. Код ошибки: 3076';
                 continue;
             } else {
                 $fondDate = trim(strip_tags($fondData['date']));
@@ -112,70 +121,63 @@ class Fonds {
             //@todo Вынести в метод.
             if (!is_numeric(trim(strip_tags($fondData['fondID'])))) {
                 // сообщить об ошибке
+                $result['errors'][] = $regNumber . ' плохо разобрался. ID фонда должно быть числом. Слушайтесь Инночку и обратитесь к разработчику. Код ошибки: 3077';
                 continue;
             } else {
                 $fondID = (integer) trim(strip_tags($fondData['fondID']));
             }
-
             $fondObj = new Fond();
+
             if ($fondID == 0) {
+                $result['log'][$regNumber] .= 'Фонд: "' . $fondName . '" отсутствовал в базе данных. Попробуем создать..<br>';
                 //если фонда не нашлось на предыдущих этапах, то создаём новый
-                $newFondID = $fondObj->createNewFond($fondRegNumber, $fondName, $fondSCA);
+                $fondID = $fondObj->createNewFond($fondRegNumber, $fondName, $fondSCA);
+                if ($fondID !== false && $fondID > 0) {
+                    $result['log'][$regNumber].= 'Создан успешно новый фонд с ID: ' . $fondID . '<br>';
+                } else {
+                    //сообщить об ошибке создания фонда.
+                    $result['log'][$regNumber].= 'Создание фонда "' . $fondName . '" провалилось. Слушайтесь Инночку и сообщите разработчику. Код ошибки: 3051.<br>';
+                    continue;
+                }
             }
-//            die(var_dump($fondObj));
-//            var_dump($fondID,$newFondID);
-
-            /*
-              if (!isset($fondsData['date']) || $fondsData['date'] == '') {
-              //сообщить об ошибке
-              continue;
-              }
-              $date = trim(strip_tags($fondsData['date']));
-
-              if (!isset($fondsData['sca']) || !is_numeric($fondsData['sca'])) {
-              //сообщить об ошибке
-              continue;
-              }
-
-
-
-
-
-              //получим новую СЧА
-              $newSCA = number_format(floatval($fondsData['sca']), 2, '.', '');
-
-              //проверим, есть ли СЧА
-              $savedSCA = $this->getSCAFromFondDatesByDate($fondData, $date);
-
-
-
-
-              if ($savedSCA <= 0) {
-              continue;
-              }
-              $fondID = isset($fondsData['fondID']) ? (integer) $fondsData['fondID'] : 0;
-
-              if ($fondID == 0) {
-              $newFondID = $fondObj->createNewFond($fondsData);
-              $fondObj->createNewFondDate($newFondID, $date, $newSCA);
-              continue;
-              }
-
-              if ($newSCA == $savedSCA) {
-              continue;
-              } else {
-
-              $fondObj->setId($id);
-              $fondObj->updateSCAbyDate($date, $newSCA);
-              }
-
-
-
-
-              die(var_dump($fondsData)); */
-            unset($fondRegNumber, $fondName, $fondID, $fondSCA,$newFondID);
+            $fondObj->loadFondById($fondID);
+            //ищем дату и проверяем значение на дату
+            if (isset($fondObj->fondDates[$fondDate]['fd_sca']) && is_numeric($fondObj->fondDates[$fondDate]['fd_sca'])) {
+                $oldSCA = number_format(floatval($fondObj->fondDates[$fondDate]['fd_sca']), 2, '.', '');
+                $result['log'][$regNumber].= 'У фонда уже есть запись об СЧА= ' . $oldSCA . ' на ' . $fondDate . '.<br>Сравним с новой СЧА =' . $fondSCA . '..<br>';
+                $result['log'][$regNumber].= $oldSCA . ' vs ' . $fondSCA . '<br>';
+                if ($fondSCA != $oldSCA) {
+                    $dateUpdateRes = $fondObj->updateFondDateSca($fondID, $fondDate, $fondSCA);
+                    if ($dateUpdateRes !== false && $dateUpdateRes > 0) {
+                        $result['log'][$regNumber].= 'Обновлена успешно запись об СЧА ' . $fondSCA . ' на ' . $fondDate . '.<br>';
+                    } else {
+                        //сообщить об ошибке создания фонда.
+                        $result['log'][$regNumber].= 'Обновление записи об СЧА ' . $fondSCA . ' на ' . $fondDate . ' провалилось. Слушайтесь Инночку и сообщите разработчику. Код ошибки: 3053.<br>';
+                        continue;
+                    }
+                } else {
+                    $result['log'][$regNumber].= '...все норм. Ничего не делаем<br>';
+                }
+            } else {
+                //создаем значение на дату
+                $result['log'][$regNumber].= 'У фонда еще нет значений СЧА на дату ' . $fondDate . ' Попробуем создать..<br>';
+                $dateCreateID = $fondObj->createFondDateSca($fondID, $fondDate, $fondSCA);
+                if ($dateCreateID !== false && $dateCreateID > 0) {
+                    $result['log'][$regNumber].= 'Создана успешно запись об СЧА ' . $fondSCA . ' на ' . $fondDate . '.<br>';
+                } else {
+                    //сообщить об ошибке создания фонда.
+                    $result['log'][$regNumber].= 'Создание записи об СЧА ' . $fondSCA . ' на ' . $fondDate . ' провалилось. Слушайтесь Инночку и сообщите разработчику. Код ошибки: 3052.<br>';
+                    continue;
+                }
+            }
+            $result['log'][$regNumber] .= '<hr>';
+            unset($fondRegNumber, $fondName, $fondID, $fondSCA, $newFondID, $fondDate, $oldSCA, $dateCreateID, $dateUpdateRes);
         }
-
+        $result['endTime'] = microtime(true);
+        $result['timeNeed'] = $result['endTime'] - $result['startTime'];
+        foreach ($result['log'] as $regNum => $value) {
+            echo $value;
+        }
         return $result;
     }
 

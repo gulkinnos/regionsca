@@ -101,24 +101,3 @@ function getAllFondsData() {
     }
     return $result;
 }
-
-/** Получает обший конфиг.
- * Также является говнометодотом.
- * 
- * 
- * @return array $config - массив с данными конфигурации.
- */
-/*
-   function getConfig() {
-    $result = require_once './config.php';
-    return $result;
-}
- /**/
-
-/*
- * 
- * это запрос для добавлени одного новго фонда
- * 
- *  INSERT INTO `fonds` (`id`, `regNumber`, `name`, `date`, `sca`, `enabled`)
- *  VALUES (NULL, '1111-2222-333', 'тестовое ', '2017-02-20', '9000000000.99', '1');
- */

@@ -1,8 +1,8 @@
 <?php
 $fondID = (isset($fondData['id']) && is_numeric($fondData['id'])) ? (integer) $fondData['id'] : 0;
-if (isset($fondData['regNumber'], $fondData['name'], $fondData['sca'], $fondData['date'], $fondData['fondDates'])) {
+if (isset($fondData['regNumber'], $fondData['name'], $fondData['parsedSCA'], $fondData['date'], $fondData['fondDates'])) {
     if (!empty($fondData['fondDates'])) {
-        var_dump($fondData['fondDates']);
+//        var_dump($fondData['fondDates']);
     }
     ?>
 
@@ -32,7 +32,7 @@ if (isset($fondData['regNumber'], $fondData['name'], $fondData['sca'], $fondData
     <?= $fondData['name'] ?>
     </td>
     <td>
-        <input class="align-right" name="parsedData[<?= $fondData['regNumber'] ?>][sca]" value="<?= $fondData['sca'] ?>"/>
+        <input class="align-right" name="parsedData[<?= $fondData['regNumber'] ?>][sca]" value="<?= $fondData['parsedSCA'] ?>"/>
     </td>
     <td>
         <input type="hidden" name="parsedData[<?= $fondData['regNumber'] ?>][date]" value='<?= $fondData['date'] ?>'/>

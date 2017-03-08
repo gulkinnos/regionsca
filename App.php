@@ -15,15 +15,25 @@ class App {
 
     public $config = array();
     public $db = null;
+    protected $_instance = null;
 
     function __construct() {
-        header('Content-Type: text/html; charset=utf-8');
+//        self::getInstance();
+    }
+
+    public static function getInstance() {
+        if (self::$_instance === null) {
+            self::$_instance = new self;
+            header('Content-Type: text/html; charset=utf-8');
+        }
+
+        return self::$_instance;
     }
 
     public function getConfig() {
         if (empty($this->config)) {
             include $_SERVER['DOCUMENT_ROOT'] . '/config.php';
-            $this->config =  $config;
+            $this->config = $config;
         }
         return $this->config;
     }
@@ -36,12 +46,10 @@ class App {
      * @param array $configArray -конфиг целиком.
      */
     function getDB() {
+        
         $this->getConfig();
-        $dbLink = new mysqli($this->config['db']['host'],
-                $this->config['db']['user'],
-                $this->config['db']['password'],
-                $this->config['db']['database']);
-        $setSQL='SET NAMES utf8 COLLATE utf8_general_ci';
+        $dbLink = new mysqli($this->config['db']['host'], $this->config['db']['user'], $this->config['db']['password'], $this->config['db']['database']);
+        $setSQL = 'SET NAMES utf8 COLLATE utf8_general_ci';
         $dbLink->query($setSQL);
         return $dbLink;
     }
