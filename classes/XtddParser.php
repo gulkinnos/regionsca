@@ -11,6 +11,11 @@ class XtddParser {
         
     }
 
+    /**
+     * 
+     * @param type $filename
+     * @return string
+     */
     function parseXTDD($filename) {
         $result = [];
 
@@ -27,21 +32,22 @@ class XtddParser {
             return 'Нам не удалось разобрать файл корректно, в блоке ОтчетностьРКИОтчет070_1 нет вложенных элементов';
         }
         $fondObj = new Fond();
-        $fondsObj=new Fonds();
-        
-        
-        $existingFondAll=$fondsObj->getAllFondsDataCollectedByRegNumber();
+        $fondsObj = new Fonds();
+
+        $existingFondAll = $fondsObj->getAllFondsDataCollectedByRegNumber();
         $fondObj->setExistingFonds($existingFondAll);
-        
-//        die(var_dump($existingFondAll));
-        /**getAll*/
-        
+
         foreach ($fonds as $fond_data) {
             $result [] = $fondObj->getFondDataArrayFromParser($fond_data);
         }
         return $result;
     }
 
+    /**
+     * 
+     * @param type $fondsData
+     * @return string
+     */
     function printParsedPreview($fondsData) {
         $result = '';
         if (!is_array($fondsData) || !count($fondsData)) {

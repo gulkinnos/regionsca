@@ -23,7 +23,6 @@ class Fond {
 
     function __construct() {
         include_once $_SERVER['DOCUMENT_ROOT'] . '/App.php';
-//        $this->getFondDatesByID(2);
     }
 
     /**
@@ -52,11 +51,10 @@ class Fond {
         }
         $sca = trim(strip_tags($sca));
 
-        $App = new App();
+        $App = App::getInstance();
         $dbConnect = $App->getDB();
 
         if (!mysqli_errno($dbConnect)) {
-
             $sql = 'INSERT INTO
                         `fonds`
                             (`regNumber`,
@@ -82,7 +80,12 @@ class Fond {
         return $result;
     }
 
-    function getFondDatesByID($fondId) {
+    /**
+     * 
+     * @param type $fondId
+     * @return array
+     */
+    static function getFondDatesByID($fondId) {
         $result = [];
         if (!is_numeric($fondId) || $fondId < 1) {
             $fondId = (integer) $fondId;
@@ -90,7 +93,7 @@ class Fond {
         if ($fondId == 0) {
             return $result;
         }
-        $App = new App();
+        $App = App::getInstance();
         $dbConnect = $App->getDB();
         if (!mysqli_errno($dbConnect)) {
             $sql = '
@@ -115,15 +118,20 @@ class Fond {
         return $result;
     }
 
-    function loadFondById($fondId) {
+    /**
+     * 
+     * @param type $fondID
+     * @return \Fond
+     */
+    function loadFondById($fondID) {
         $result = null;
-        if (!is_numeric($fondId) || $fondId < 1) {
+        if (!is_numeric($fondID) || $fondID < 1) {
             return $result;
         }
-        if ($fondId == 0) {
-            $fondId = (integer) $fondId;
+        if ($fondID == 0) {
+            $fondID = (integer) $fondID;
         }
-        $App = new App();
+        $App = App::getInstance();
         $dbConnect = $App->getDB();
         if (!mysqli_errno($dbConnect)) {
             $sql = '
@@ -135,7 +143,7 @@ class Fond {
                         `enabled`
                     FROM 
                         `fonds`
-                    WHERE `id`=' . $fondId . '
+                    WHERE `id`=' . $fondID . '
                     LIMIT 1;';
         }
         $dbResult = mysqli_query($dbConnect, $sql);
@@ -146,11 +154,16 @@ class Fond {
             $this->name = $row['name'];
             $this->date = $row['dateOfCreate'];
             $this->enabled = $row['enabled'];
-            $this->fondDates = $this->getFondDatesByID($fondId);
+            $this->fondDates = $this->getFondDatesByID($fondID);
         }
         return $this;
     }
 
+    /**
+     * 
+     * @param type $fond_data
+     * @return array
+     */
     function getFondDataArrayFromParser($fond_data) {
         $result = array();
 
@@ -199,6 +212,52 @@ class Fond {
         return $result;
     }
 
+    /**
+     * 
+     * @param type $fondID
+     * @return type
+     */
+    public static function getFondArrayById($fondID) {
+        $result = null;
+        if (!is_numeric($fondID) || $fondID < 1) {
+            return $result;
+        }
+        if ($fondID == 0) {
+            $fondID = (integer) $fondID;
+        }
+        $App = App::getInstance();
+        $dbConnect = $App->getDB();
+        if (!mysqli_errno($dbConnect)) {
+            $sql = '
+                    SELECT 
+                        `id`,
+                        `regNumber`,
+                        `name`,
+                        `dateOfCreate`,
+                        `enabled`
+                    FROM 
+                        `fonds`
+                    WHERE `id`=' . $fondID . '
+                    LIMIT 1;';
+        }
+        $dbResult = mysqli_query($dbConnect, $sql);
+        if ($dbResult) {
+            $row = mysqli_fetch_assoc($dbResult);
+            $result = $row;
+            if (count($row) > 0) {
+                $result['fondDates'] = Fond::getFondDatesByID($fondID);
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * 
+     * @param type $fondID
+     * @param type $date
+     * @param type $sca
+     * @return boolean
+     */
     public function createFondDateSca($fondID, $date, $sca) {
         $result = false;
         if (!is_numeric($fondID) || $fondID < 1) {
@@ -216,7 +275,7 @@ class Fond {
             return $result;
         }
         $sca = number_format(floatval($sca), 2, '.', '');
-        $App = new App();
+        $App = App::getInstance();
         $dbConnect = $App->getDB();
         if (!mysqli_errno($dbConnect)) {
             $sql = 'INSERT INTO
@@ -260,7 +319,7 @@ class Fond {
             return $result;
         }
         $sca = number_format(floatval($sca), 2, '.', '');
-        $App = new App();
+        $App = App::getInstance();
         $dbConnect = $App->getDB();
         if (!mysqli_errno($dbConnect)) {
             $sql = 'UPDATE
@@ -281,6 +340,56 @@ class Fond {
         return $result;
     }
 
+    /**
+     * 
+     * @param type $scaID
+     * @param type $sca
+     * @param type $fondID
+     * @return boolean
+     */
+    public static function updateFondScaById($scaID, $sca, $fondID) {
+        $result = false;
+        if (!is_numeric($fondID) || $fondID < 1) {
+            $fondID = (integer) $fondID;
+        }
+        if ($fondID == 0) {
+            return $result;
+        }
+        if (!is_numeric($scaID) || $scaID < 1) {
+            $scaID = (integer) $scaID;
+        }
+        if ($scaID == 0) {
+            return $result;
+        }
+        if (!is_numeric($sca)) {
+            return $result;
+        }
+        $sca = number_format(floatval($sca), 2, '.', '');
+        $App = App::getInstance();
+        $dbConnect = $App->getDB();
+        if (!mysqli_errno($dbConnect)) {
+            $sql = 'UPDATE
+                        `fonds_dates`
+                        SET
+                            `fd_sca`=' . $sca
+                    /* . ',
+                      `fd_sca_change_time`=CURRENT_TIMESTAMP */
+                    . 'WHERE
+                            `fd_id`= "' . $scaID . '"
+                                AND
+                            `fd_fond_id`= ' . $fondID . '
+                        LIMIT 1;';
+            $dbr = $dbConnect->query($sql);
+            $result = $dbConnect->affected_rows;
+        }
+        return $result;
+    }
+
+    /**
+     * 
+     * @param type $regNumber
+     * @return int
+     */
     function getFondIDByRegNumber($regNumber) {
         $result = 0;
         if (!is_array($this->existingFonds) || count($this->existingFonds) < 1) {
@@ -293,6 +402,11 @@ class Fond {
         return $result;
     }
 
+    /**
+     * 
+     * @param type $fondData
+     * @return type
+     */
     static function printFondData($fondData) {
         include $_SERVER['DOCUMENT_ROOT'] . ' / templates / fond / fondPreview . php';
         return;
@@ -310,12 +424,32 @@ class Fond {
         return $this->regNumber;
     }
 
+    function getParsedSCA() {
+        return $this->parsedSCA;
+    }
+
     function getEnabled() {
         return $this->enabled;
     }
 
+    function getDate() {
+        return $this->date;
+    }
+
+    function getFondData() {
+        return $this->fondData;
+    }
+
+    function getFondDates() {
+        return $this->fondDates;
+    }
+
     function getDatesSCA() {
         return $this->datesSCA;
+    }
+
+    function getExistingFonds() {
+        return $this->existingFonds;
     }
 
     function setId($id) {
@@ -330,28 +464,32 @@ class Fond {
         $this->regNumber = $regNumber;
     }
 
+    function setParsedSCA($parsedSCA) {
+        $this->parsedSCA = $parsedSCA;
+    }
+
     function setEnabled($enabled) {
         $this->enabled = $enabled;
+    }
+
+    function setDate($date) {
+        $this->date = $date;
+    }
+
+    function setFondData($fondData) {
+        $this->fondData = $fondData;
+    }
+
+    function setFondDates($fondDates) {
+        $this->fondDates = $fondDates;
     }
 
     function setDatesSCA($datesSCA) {
         $this->datesSCA = $datesSCA;
     }
 
-    function getExistingFonds() {
-        return $this->existingFonds;
-    }
-
     function setExistingFonds($existingFonds) {
         $this->existingFonds = $existingFonds;
-    }
-
-    function getFondDates() {
-        return $this->fondDates;
-    }
-
-    function setFondDates($fondDates) {
-        $this->fondDates = $fondDates;
     }
 
 }

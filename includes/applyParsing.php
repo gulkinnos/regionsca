@@ -6,8 +6,8 @@ if (isset($_POST['saveParsedData']) && $_POST['saveParsedData'] == 'save') {
         include_once $_SERVER['DOCUMENT_ROOT'] . '/classes/Fond.php';
         include_once $_SERVER['DOCUMENT_ROOT'] . '/classes/Fonds.php';
         $fonds = new Fonds();
+        echo '<a href="/">На главную</a> <a href="/includes/viewAllFonds.php">Все фонды</a><br>';
         $fonds->analizeParsedFondsData($parsedData);
-//        die(var_dump($parsedData));
     } else {
         die('Пришли кривые данные. Слушайтесь Инночку и обратитесь к разработчику. Код ошибки: 3001');
     }

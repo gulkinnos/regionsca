@@ -8,8 +8,8 @@
 #signOut, #signIn{
     position: absolute;
     top: 1rem;
-    right: 10rem;
-    width: 20rem;
+    right: 0rem;
+    width: 17rem;
     height: 5rem;
 
 }
@@ -22,11 +22,37 @@
     padding: 0.5rem;
 }
 #fondsPreview tr:nth-child(even){
-    background-color: #eef5e8;
+    background-color: rgba(49, 169, 0, 0.17);
+}
+#fondsViewAll tr.fondRow:nth-child(even){
+    background-color: rgba(49, 169, 0, 0.17);
+}
+.evenRow{
+    background-color: rgba(49, 169, 0, 0.17);
+}
+
+#fondsViewAll td, th{
+    border-collapse: collapse;
+    border: solid 1px black;
+    padding: 0.5rem;
+}
+#fondsViewAll{
+    border-collapse: collapse;
 }
 .tableDescription{
     text-align: left;
 }
 .align-right{
     text-align: right;
+}
+table, table td{
+    border: solid black 1px;
+    border-collapse: collapse;
+    padding: 0.5rem;
+}
+.noBorders{
+    border: none;
+}
+a{
+    max-width: 10%;
 }

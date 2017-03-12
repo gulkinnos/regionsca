@@ -13,29 +13,29 @@
  */
 class App {
 
-    public $config = array();
+    public static $config = array();
     public $db = null;
-    protected $_instance = null;
+    protected static $_instance = null;
 
     function __construct() {
-//        self::getInstance();
+        
     }
 
     public static function getInstance() {
         if (self::$_instance === null) {
             self::$_instance = new self;
+            self::$config = self::getConfig();
             header('Content-Type: text/html; charset=utf-8');
         }
-
         return self::$_instance;
     }
 
-    public function getConfig() {
-        if (empty($this->config)) {
+    public static function getConfig() {
+        if (empty(self::$config)) {
             include $_SERVER['DOCUMENT_ROOT'] . '/config.php';
-            $this->config = $config;
+            self::$config = $config;
         }
-        return $this->config;
+        return self::$config;
     }
 
     /** Подключается к базе данных.
@@ -46,12 +46,13 @@ class App {
      * @param array $configArray -конфиг целиком.
      */
     function getDB() {
-        
-        $this->getConfig();
-        $dbLink = new mysqli($this->config['db']['host'], $this->config['db']['user'], $this->config['db']['password'], $this->config['db']['database']);
-        $setSQL = 'SET NAMES utf8 COLLATE utf8_general_ci';
-        $dbLink->query($setSQL);
-        return $dbLink;
+        if (is_null($this->db)) {
+            $dbLink = new mysqli(self::$config['db']['host'], self::$config['db']['user'], self::$config['db']['password'], self::$config['db']['database']);
+            $setSQL = 'SET NAMES utf8 COLLATE utf8_general_ci';
+            $dbLink->query($setSQL);
+            $this->db = $dbLink;
+        }
+        return $this->db;
     }
 
 }

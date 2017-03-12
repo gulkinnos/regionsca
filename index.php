@@ -8,6 +8,7 @@
 <?php
 include_once $_SERVER['DOCUMENT_ROOT'] . '/includes/checkAuth.php';
 ?>
+<div><a href="/includes/viewAllFonds.php" target="_blank">Просмотр фондов</a></div>
 <p>Выберите файл и нажмите кнопку "Проверить XTDD"</p>
 <form name="xmlForm" action="import.php" method="POST" enctype="multipart/form-data">
     <input type="file" name="xmlfile" /> <br> <br>

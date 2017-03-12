@@ -2,7 +2,6 @@
 $fondID = (isset($fondData['id']) && is_numeric($fondData['id'])) ? (integer) $fondData['id'] : 0;
 if (isset($fondData['regNumber'], $fondData['name'], $fondData['parsedSCA'], $fondData['date'], $fondData['fondDates'])) {
     if (!empty($fondData['fondDates'])) {
-//        var_dump($fondData['fondDates']);
     }
     ?>
 

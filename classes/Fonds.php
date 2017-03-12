@@ -12,6 +12,11 @@ class Fonds {
         include_once $_SERVER['DOCUMENT_ROOT'] . '/classes/Fond.php';
     }
 
+    /**
+     * 
+     * @param type $fondsData
+     * @return string
+     */
     public static function printFondsPreview($fondsData) {
         $result = '';
         if (!is_array($fondsData) || !count($fondsData)) {
@@ -34,7 +39,7 @@ class Fonds {
      */
     public function getAllFondsDataCollectedByRegNumber() {
         $result = [];
-        $App = new App();
+        $App = App::getInstance();
         $dbConnect = $App->getDB();
         if (!mysqli_errno($dbConnect)) {
             $sql = '
@@ -56,6 +61,46 @@ class Fonds {
         return $result;
     }
 
+    /**
+     * 
+     * @return type
+     */
+    public function getAllFondsAndDatesCollRegNum() {
+        $result = [];
+        $App = App::getInstance();
+        $fond = new Fond();
+        $dbConnect = $App->getDB();
+        if (!mysqli_errno($dbConnect)) {
+            $sql = '
+                SELECT
+                    `id`,
+                    `regNumber`,
+                    `name`,
+                    `dateOfCreate`,
+                    `enabled`
+                FROM
+                    `fonds` 
+                ORDER BY
+                    `regNumber` ASC LIMIT 10000;';
+        }
+        $dbResult = mysqli_query($dbConnect, $sql);
+        if ($dbResult) {
+            while ($row = mysqli_fetch_assoc($dbResult)) {
+                $result[$row['regNumber']] = $row;
+                $fondID = $row['id'];
+                $result[$row['regNumber']]['fondDates'] = $fond->getFondDatesByID($fondID);
+            }
+        }
+
+
+        return $result;
+    }
+
+    /**
+     * 
+     * @param type $fondsData
+     * @return string
+     */
     public function analizeParsedFondsData($fondsData) {
         $result = [];
         $result['startTime'] = microtime(true);
@@ -181,6 +226,12 @@ class Fonds {
         return $result;
     }
 
+    /**
+     * 
+     * @param type $fondDates
+     * @param type $date
+     * @return int
+     */
     public function getSCAFromFondDatesByDate($fondDates, $date) {
         $result = 0;
         if (!is_array($fondDates) || !count($fondDates)) {
